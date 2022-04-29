@@ -16,7 +16,8 @@ def _euclid_dist(x1, x2, x3, y1, y2, y3):
 @contextmanager
 def _connect():
     conn = sqlite3.connect("colors.db")
-    conn.create_function("euclid_dist", 6, _euclid_dist, deterministic=True)
+    #conn.create_function("euclid_dist", 6, _euclid_dist, deterministic=True)  # version diff?
+    conn.create_function("euclid_dist", 6, _euclid_dist)
     try:
         yield conn
     finally:
