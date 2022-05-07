@@ -36,6 +36,12 @@ def main():
         total_weights = jis_to_color + color_to_jis
         if total_weights == 0:
             st.warning("All weights are zero. All types are generated with equal probability")
+        
+        st.markdown("""
+        ---
+        *Data source*
+        - [色彩図鑑](https://www.i-iro.com/dic/tag/jis)
+        """)
 
     q = _current_question()
     if q is None:
