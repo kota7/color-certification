@@ -33,6 +33,11 @@ def jis_data():
     logger.info("Loading JIS data")
     return pd.read_csv(os.path.join(os.path.dirname(__file__), "jis.csv"), encoding="utf8")
 
+@st.cache
+def pccs_data():
+    logger.info("Loading PCCS data")
+    return pd.read_csv(os.path.join(os.path.dirname(__file__), "pccs.csv"), encoding="utf8")
+
 
 Color = namedtuple("Color", "name reading rgb info")
 
@@ -64,7 +69,6 @@ class JIStoColor(Question):
     def _question_markdown(self):
         c = self.colors[self.answer_index]
         answer = "{} ({})".format(c.name, c.reading)
-        n = len(self.colors)
         row1 = " ".join("""<td class="number">{}</td>""".format(c) for c in self._choices)
         row2 = " ".join("""<td class="color" bgcolor="{}"></td>""".format(c.rgb) for c in self.colors)
         markdown = """
@@ -154,6 +158,94 @@ class ColorToJIS(JIStoColor):
         return ["{} ({}, {}, {})".format(col.name, col.reading, col.info, col.rgb) for col in self.colors]
 
 
+class PCCStoColor(Question):
+    def __init__(self, n=4, distance_threshold=-1):
+        self.colors = choose_pccs_colors(n=n, distance_threshold=distance_threshold)
+        self.answer_index = random.randint(0, n-1)
+        self.user_answer = None
+        logger.info("Colors: %s, answer: %s", self.colors, self.answer_index)
+
+    @property
+    def _choices(self):
+        return list(range(1, len(self.colors) + 1))
+
+    @property
+    def _choices_details(self):
+        # radio items to show with answers
+        return ["{}. {} ({})".format(c, col.name, col.rgb) for c,col in zip(self._choices, self.colors)]
+
+    @property
+    def _question_markdown(self):
+        c = self.colors[self.answer_index]
+        answer = c.name
+        row1 = " ".join("""<td class="number">{}</td>""".format(c) for c in self._choices)
+        row2 = " ".join("""<td class="color" bgcolor="{}"></td>""".format(c.rgb) for c in self.colors)
+        markdown = """
+        **{}** はどれ？
+        <table><tr>{}</tr><tr> {}</tr></table>
+        """.format(answer, row1, row2)
+        return markdown
+
+    @property
+    def _details_markdown(self):
+        # additional info to show with the result
+        return None
+  
+    @property
+    def _user_answer_index(self):
+        # maps index corresponding to the user's answer
+        return self._choices.index(self.user_answer)
+
+    def show_question(self):
+        markdown = self._question_markdown
+        st.markdown(markdown, unsafe_allow_html=True)        
+        r = st.radio("", self._choices)
+        if st.button("ENTER"):
+            self.user_answer = r
+            logger.info("User answer is given: %s", self.user_answer)
+            _update_history(self._user_answer_index == self.answer_index)
+            st.experimental_rerun()
+
+    def show_result(self):
+        logger.info("User answer: %s", self.user_answer)
+        markdown = self._question_markdown
+        st.markdown(markdown, unsafe_allow_html=True)
+        st.radio("", self._choices_details, disabled=True, index=self._user_answer_index)
+
+        message = "**Goog job!**" if (self._user_answer_index == self.answer_index) else "Not correct..."
+        message += "　Answer: **{}**".format(self._choices[self.answer_index])
+        st.markdown(message)
+
+        details = self._details_markdown
+        if details is not None:
+            st.markdown(details, unsafe_allow_html=True)
+
+
+class ColorToPCCS(PCCStoColor):
+    @property
+    def _choices(self):
+        return [c.name for c in self.colors]
+
+    @property
+    def _choices_details(self):
+        # radio items to show with answers
+        return ["{} ({})".format(col.name, col.rgb) for col in self.colors]
+
+    @property
+    def _question_markdown(self):
+        rgb = self.colors[self.answer_index].rgb
+        markdown = """
+        この色のPCCS表記は？
+        <table><tr><td class="color" bgcolor="{}"></td></tr></table>
+        """.format(rgb)
+        return markdown
+
+    @property
+    def _details_markdown(self):
+        # additional info to show with the result
+        return None
+
+
 def _rgb_distance(x, y):
     # x, y are string of format "#RRGGBB"
     def _to_tuple(x):
@@ -177,7 +269,7 @@ def _update_history(result):
 
 
 def choose_jis_colors(n=4, distinct_rgb=True, distinct_info=True, same_category=True, distance_threshold=-1):
-    # pick n jis colors that are close
+    # pick n jis colors
     x = jis_data().copy()
     # shuffle beforehand remove duplicates in a random manner
     x = x.sample(frac=1).reset_index(drop=True)
@@ -220,6 +312,30 @@ def choose_jis_colors(n=4, distinct_rgb=True, distinct_info=True, same_category=
     return colors
 
 
+def choose_pccs_colors(n=4, distance_threshold=-1):
+    # pick n pccs colors
+    x = pccs_data().copy()
+    # shuffle beforehand remove duplicates in a random manner
+    x = x.sample(frac=1).reset_index(drop=True)
+
+    if distance_threshold > 0 and len(x) > n:
+        # pick a random benchmark color and filter only colors within distance threshold
+        bench = random.choice(x.rgb)
+        logger.info("Benchmark color: '%s'", bench)
+        distances = [_rgb_distance(bench, r) for r in x.rgb]
+        # adjust threshold to keep n records
+        dist_n = sorted(distances)[3]
+        threshold = max(distance_threshold, dist_n)
+        if threshold != distance_threshold:
+            logger.info("Threshold adjusted %s --> %s to make sure sufficient records (%d)", distance_threshold, threshold, n)
+        s1 = len(x)
+        x = x[[d < threshold for d in distances]]
+        logger.info("Distance threshold filtering %d --> %d", s1, len(x))
+
+    tmp = x.sample(n)
+    colors = [Color(row.pccs, "", row.rgb, row.pccs_attr) for _, row in tmp.iterrows()]
+    return colors
+
 def generate_question(question_type):
     if question_type == "jis_to_color":
         r = random.random()
@@ -232,7 +348,6 @@ def generate_question(question_type):
         else:
             same_category = False
             distance_threshold = 50
-
         return JIStoColor(same_category=same_category, distance_threshold=distance_threshold)
 
     elif question_type == "color_to_jis":
@@ -246,7 +361,6 @@ def generate_question(question_type):
         else:
             same_category = False
             distance_threshold = 50
-
         return ColorToJIS(same_category=same_category, distance_threshold=distance_threshold)
 
     elif question_type == "jis_to_info":
@@ -260,7 +374,26 @@ def generate_question(question_type):
         else:
             same_category = False
             distance_threshold = 50
-
         return JIStoInfo(same_category=same_category, distance_threshold=distance_threshold)
+
+    elif question_type == "pccs_to_color":
+        r = random.random()
+        if r <= 0.333:
+            distance_threshold = -1
+        elif r <= 0.667:
+            distance_threshold = 100
+        else:
+            distance_threshold = 50
+        return PCCStoColor(distance_threshold=distance_threshold)
+
+    elif question_type == "color_to_pccs":
+        r = random.random()
+        if r <= 0.333:
+            distance_threshold = -1
+        elif r <= 0.667:
+            distance_threshold = 100
+        else:
+            distance_threshold = 50
+        return ColorToPCCS(distance_threshold=distance_threshold)
 
     return ValueError("Question type not supported: '{}'".format(question_type))

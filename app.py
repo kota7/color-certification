@@ -19,6 +19,8 @@ def main():
              "jis_to_color": jis_to_color
             ,"color_to_jis": color_to_jis
             ,"jis_to_info": jis_to_info
+            ,"pccs_to_color": pccs_to_color
+            ,"color_to_pccs": color_to_pccs
         }
         types = list(question_weights)
         weights = list(question_weights.values())
@@ -40,8 +42,10 @@ def main():
         jis_to_color = st.slider("慣用色名 → 色", 0, 10, 10, key="jis_to_color")
         color_to_jis = st.slider("色 → 慣用色名", 0, 10, 10, key="color_to_jis")
         jis_to_info = st.slider("慣用色名 → 概要", 0, 10, 10, key="jis_to_info")
+        pccs_to_color = st.slider("PCCS表記 → 色", 0, 10, 10, key="pccs_to_color")
+        color_to_pccs = st.slider("色 → PCCS表記", 0, 10, 10, key="color_to_pccs")
 
-        total_weights = jis_to_color + color_to_jis + jis_to_info
+        total_weights = jis_to_color + color_to_jis + jis_to_info + pccs_to_color + color_to_pccs
         if total_weights == 0:
             st.warning("All weights are zero. All types are generated with equal probability")
         
@@ -49,6 +53,7 @@ def main():
         ---
         *Data source*
         - [色彩図鑑](https://www.i-iro.com/dic/tag/jis)
+        - [PCCS Color List](http://www.wsj21.net/ghp/ghp0c_03.html)
         """)
 
     q = _current_question()
