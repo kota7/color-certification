@@ -7,7 +7,7 @@ Color Certification Quiz
 
 [Streamlit Cloud](https://share.streamlit.io/kota7/color-certification/main/app.py) で公開しています。
 
-<img src="./colorapp.png" width="500" border="1" alt="sampleimage">
+<kbd><img src="./colorapp.png" width="500" alt="sampleimage"></kbd>
 
 
 Data source:
