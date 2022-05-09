@@ -3,7 +3,9 @@
 import random
 from logging import getLogger
 import streamlit as st
-from questions import generate_question, KEY_ANSWER_HISTORY, CSS as QUESTION_CSS
+from questions import generate_question, KEY_ANSWER_HISTORY
+from questions import CSS as QUESTION_CSS
+
 logger = getLogger(__file__)
 
 # state variable names
