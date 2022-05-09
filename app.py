@@ -38,11 +38,12 @@ def main():
         st.experimental_rerun()
 
     st.set_page_config(
-      page_title="色彩検定クイズ (非公式)"
+      page_title="色彩検定®クイズ (非公式)"
     )
     st.markdown("""<style> {} </style>""".format(QUESTION_CSS), unsafe_allow_html=True)
 
     with st.sidebar:
+        st.markdown("### 色彩検定®クイズ (非公式)")
         st.write("問題の種類を選択（数値が高いものほど多く出題されます）")
         jis_to_color = st.slider("慣用色名 → 色", 0, 10, 10, key="jis_to_color")
         color_to_jis = st.slider("色 → 慣用色名", 0, 10, 10, key="color_to_jis")
@@ -94,7 +95,7 @@ def main():
         st.markdown("正答率 %d / %d (%.1f %%)" % (correct, n, correct*100/n))
     
     st.markdown("---")
-    st.markdown("非公式アプリです. 色の表示などが正しくない可能性があります.")
+    st.markdown("非公式の学習用アプリです. 色の表示などが正しくない可能性があります.")
 
 if __name__ == "__main__":
     main()

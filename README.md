@@ -3,6 +3,11 @@ Color Certification Quiz
 
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/kota7/color-certification/main/app.py)
 
+色彩検定®クイズ。非公式の学習用アプリです。ウェブ上に表示された色が印刷物と異なる場合があります。
+
+<img src="./colorapp.png" width="500" border="1">
+
+[Streamlit Cloud](https://share.streamlit.io/kota7/color-certification/main/app.py) で公開しています。
 
 Data source:
 - [色彩図鑑](https://www.i-iro.com/dic/tag/jis)
