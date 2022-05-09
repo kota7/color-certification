@@ -37,6 +37,9 @@ def main():
         st.session_state[KEY_QUESTION] = q
         st.experimental_rerun()
 
+    st.set_page_config(
+      page_title="色彩検定クイズ (非公式)"
+    )
     st.markdown("""<style> {} </style>""".format(QUESTION_CSS), unsafe_allow_html=True)
 
     with st.sidebar:
@@ -53,10 +56,18 @@ def main():
         
         st.markdown("""
         ---
-        *Data source*
+        *Data Souces*
         - [色彩図鑑](https://www.i-iro.com/dic/tag/jis)
         - [PCCS Color List](http://www.wsj21.net/ghp/ghp0c_03.html)
         """)
+
+        st.markdown("""
+        *Links*
+        - Source: [color-certification](https://github.com/kota7/color-certification)
+        - Bug report: [color-certification/issues](https://github.com/kota7/color-certification/issues)
+        """)
+ 
+
 
     q = _current_question()
     if q is None:
@@ -81,6 +92,9 @@ def main():
         correct = sum(results)
         n = len(results)
         st.markdown("正答率 %d / %d (%.1f %%)" % (correct, n, correct*100/n))
+    
+    st.markdown("---")
+    st.markdown("非公式アプリです. 色の表示などが正しくない可能性があります.")
 
 if __name__ == "__main__":
     main()
