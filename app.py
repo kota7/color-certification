@@ -3,20 +3,26 @@
 import random
 from logging import getLogger
 import streamlit as st
-from questions import generate_question, KEY_ANSWER_HISTORY
+from questions import generate_question, KEY_ANSWER_HISTORY, CSS as QUESTION_CSS
 logger = getLogger(__file__)
 
 # state variable names
 KEY_QUESTION = "currentQuestion"
+
 
 def _current_question():
     return st.session_state.get(KEY_QUESTION)
 
 def main():
     def _update_question():
-        question_weights = {"jis_to_color": jis_to_color, "color_to_jis": color_to_jis}
+        question_weights = {
+             "jis_to_color": jis_to_color
+            ,"color_to_jis": color_to_jis
+            ,"jis_to_info": jis_to_info
+        }
         types = list(question_weights)
         weights = list(question_weights.values())
+        logger.info("%s, %s", types, weights)
         if sum(weights) == 0:
             weights = [1] * len(types)  # when all weights are zero, assign equal probabilities
             
@@ -27,13 +33,15 @@ def main():
         st.session_state[KEY_QUESTION] = q
         st.experimental_rerun()
 
+    st.markdown("""<style> {} </style>""".format(QUESTION_CSS), unsafe_allow_html=True)
 
     with st.sidebar:
         st.write("問題の種類を選択（数値が高いものほど多く出題されます）")
         jis_to_color = st.slider("慣用色名 → 色", 0, 10, 10, key="jis_to_color")
         color_to_jis = st.slider("色 → 慣用色名", 0, 10, 10, key="color_to_jis")
-        
-        total_weights = jis_to_color + color_to_jis
+        jis_to_info = st.slider("慣用色名 → 概要", 0, 10, 10, key="jis_to_info")
+
+        total_weights = jis_to_color + color_to_jis + jis_to_info
         if total_weights == 0:
             st.warning("All weights are zero. All types are generated with equal probability")
         
