@@ -299,12 +299,12 @@ def choose_jis_colors(n=4, distinct_rgb=True, distinct_info=True, same_category=
         logger.info("Benchmark color: '%s'", bench)
         distances = [_rgb_distance(bench, r) for r in x.rgb]
         # adjust threshold to keep n records
-        dist_n = sorted(distances)[3]
+        dist_n = sorted(distances)[n+5]
         threshold = max(distance_threshold, dist_n)
         if threshold != distance_threshold:
             logger.info("Threshold adjusted %s --> %s to make sure sufficient records (%d)", distance_threshold, threshold, n)
         s1 = len(x)
-        x = x[[d < threshold for d in distances]]
+        x = x[[d <= threshold for d in distances]]
         logger.info("Distance threshold filtering %d --> %d", s1, len(x))
 
     tmp = x.sample(n)
@@ -323,13 +323,13 @@ def choose_pccs_colors(n=4, distance_threshold=-1):
         bench = random.choice(x.rgb)
         logger.info("Benchmark color: '%s'", bench)
         distances = [_rgb_distance(bench, r) for r in x.rgb]
-        # adjust threshold to keep n records
-        dist_n = sorted(distances)[3]
+        # adjust threshold to keep sufficient records
+        dist_n = sorted(distances)[n+5]
         threshold = max(distance_threshold, dist_n)
         if threshold != distance_threshold:
             logger.info("Threshold adjusted %s --> %s to make sure sufficient records (%d)", distance_threshold, threshold, n)
         s1 = len(x)
-        x = x[[d < threshold for d in distances]]
+        x = x[[d <= threshold for d in distances]]
         logger.info("Distance threshold filtering %d --> %d", s1, len(x))
 
     tmp = x.sample(n)
