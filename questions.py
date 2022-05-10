@@ -172,7 +172,7 @@ class PCCStoColor(Question):
     @property
     def _choices_details(self):
         # radio items to show with answers
-        return ["{}. {} ({})".format(c, col.name, col.rgb) for c,col in zip(self._choices, self.colors)]
+        return ["{}. {} ({}, {})".format(c, col.name, col.info, col.rgb) for c,col in zip(self._choices, self.colors)]
 
     @property
     def _question_markdown(self):
@@ -229,7 +229,7 @@ class ColorToPCCS(PCCStoColor):
     @property
     def _choices_details(self):
         # radio items to show with answers
-        return ["{} ({})".format(col.name, col.rgb) for col in self.colors]
+        return ["{} ({}, {})".format(col.name, col.info, col.rgb) for col in self.colors]
 
     @property
     def _question_markdown(self):
