@@ -28,12 +28,12 @@ td.number {
 }
 """
 
-@st.cache
+@st.experimental_singleton
 def jis_data():
     logger.info("Loading JIS data")
     return pd.read_csv(os.path.join(os.path.dirname(__file__), "jis.csv"), encoding="utf8")
 
-@st.cache
+@st.experimental_singleton
 def pccs_data():
     logger.info("Loading PCCS data")
     return pd.read_csv(os.path.join(os.path.dirname(__file__), "pccs.csv"), encoding="utf8")
